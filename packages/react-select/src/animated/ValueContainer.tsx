@@ -87,7 +87,7 @@ const useIsMultiValueContainer = ({
     ...innerProps,
     style: {
       ...innerProps?.style,
-      display: (isMulti && hasValue) || cssDisplayFlex ? 'flex' : 'grid',
+      display: cssDisplayFlex ? 'flex' : 'grid',
     },
   };
 
