@@ -1,6 +1,7 @@
-import React, { KeyboardEventHandler } from 'react';
+import React, { Component, KeyboardEventHandler } from 'react';
 
 import CreatableSelect from 'react-select/creatable';
+import { ActionMeta, OnChangeValue } from 'react-select';
 
 const components = {
   DropdownIndicator: null,
@@ -16,33 +17,60 @@ const createOption = (label: string) => ({
   value: label,
 });
 
-export default () => {
-  const [inputValue, setInputValue] = React.useState('');
-  const [value, setValue] = React.useState<readonly Option[]>([]);
+interface State {
+  readonly inputValue: string;
+  readonly value: readonly Option[];
+}
 
-  const handleKeyDown: KeyboardEventHandler = (event) => {
+export default class CreatableInputOnly extends Component<{}, State> {
+  state: State = {
+    inputValue: '',
+    value: [],
+  };
+  handleChange = (
+    value: OnChangeValue<Option, true>,
+    actionMeta: ActionMeta<Option>
+  ) => {
+    console.group('Value Changed');
+    console.log(value);
+    console.log(`action: ${actionMeta.action}`);
+    console.groupEnd();
+    this.setState({ value });
+  };
+  handleInputChange = (inputValue: string) => {
+    this.setState({ inputValue });
+  };
+  handleKeyDown: KeyboardEventHandler<HTMLDivElement> = (event) => {
+    const { inputValue, value } = this.state;
     if (!inputValue) return;
     switch (event.key) {
       case 'Enter':
       case 'Tab':
-        setValue((prev) => [...prev, createOption(inputValue)]);
-        setInputValue('');
+        console.group('Value Added');
+        console.log(value);
+        console.groupEnd();
+        this.setState({
+          inputValue: '',
+          value: [...value, createOption(inputValue)],
+        });
         event.preventDefault();
     }
   };
-
-  return (
-    <CreatableSelect
-      components={components}
-      inputValue={inputValue}
-      isClearable
-      isMulti
-      menuIsOpen={false}
-      onChange={(newValue) => setValue(newValue)}
-      onInputChange={(newValue) => setInputValue(newValue)}
-      onKeyDown={handleKeyDown}
-      placeholder="Type something and press enter..."
-      value={value}
-    />
-  );
-};
+  render() {
+    const { inputValue, value } = this.state;
+    return (
+      <CreatableSelect
+        components={components}
+        inputValue={inputValue}
+        isClearable
+        isMulti
+        menuIsOpen={false}
+        onChange={this.handleChange}
+        onInputChange={this.handleInputChange}
+        onKeyDown={this.handleKeyDown}
+        placeholder="Type something and press enter..."
+        value={value}
+      />
+    );
+  }
+}

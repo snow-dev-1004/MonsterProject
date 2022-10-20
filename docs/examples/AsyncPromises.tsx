@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { Component } from 'react';
 
 import AsyncSelect from 'react-select/async';
 import { ColourOption, colourOptions } from '../data';
@@ -16,6 +16,10 @@ const promiseOptions = (inputValue: string) =>
     }, 1000);
   });
 
-export default () => (
-  <AsyncSelect cacheOptions defaultOptions loadOptions={promiseOptions} />
-);
+export default class WithPromises extends Component {
+  render() {
+    return (
+      <AsyncSelect cacheOptions defaultOptions loadOptions={promiseOptions} />
+    );
+  }
+}
