@@ -1,5 +1,5 @@
 /** @jsx jsx */
-import { useState } from 'react';
+import { Component } from 'react';
 import { jsx } from '@emotion/react';
 import { CSSObject } from '@emotion/serialize';
 import moment, { Moment } from 'moment';
@@ -183,47 +183,73 @@ const Option = (props: OptionProps<DateOption, false>) => {
 
 interface DatePickerProps {
   readonly value: DateOption | null;
-  readonly onChange: (newValue: DateOption | null) => void;
+  readonly onChange: (value: DateOption | null) => void;
 }
 
-const DatePicker = (props: DatePickerProps) => {
-  const [options, setOptions] = useState(defaultOptions);
+interface DatePickerState {
+  readonly options: readonly (DateOption | CalendarGroup)[];
+}
 
-  const handleInputChange = (value: string) => {
+class DatePicker extends Component<DatePickerProps, DatePickerState> {
+  state: DatePickerState = {
+    options: defaultOptions,
+  };
+  handleInputChange = (value: string) => {
     if (!value) {
-      setOptions(defaultOptions);
+      this.setState({ options: defaultOptions });
       return;
     }
     const date = chrono.parseDate(suggest(value.toLowerCase()));
-    if (!date) {
-      setOptions([]);
-      return;
+    if (date) {
+      this.setState({
+        options: [createOptionForDate(date), createCalendarOptions(date)],
+      });
+    } else {
+      this.setState({
+        options: [],
+      });
     }
-    setOptions([createOptionForDate(date), createCalendarOptions(date)]);
   };
+  render() {
+    const { value } = this.props;
+    const { options } = this.state;
+    return (
+      <Select<DateOption, false>
+        {...this.props}
+        components={{ Group, Option }}
+        filterOption={null}
+        isMulti={false}
+        isOptionSelected={(o, v) => v.some((i) => i.date.isSame(o.date, 'day'))}
+        maxMenuHeight={380}
+        onChange={this.props.onChange}
+        onInputChange={this.handleInputChange}
+        options={options}
+        value={value}
+      />
+    );
+  }
+}
 
-  return (
-    <Select<DateOption, false>
-      {...props}
-      components={{ Group, Option }}
-      filterOption={null}
-      isMulti={false}
-      isOptionSelected={(o, v) => v.some((i) => i.date.isSame(o.date, 'day'))}
-      maxMenuHeight={380}
-      onChange={props.onChange}
-      onInputChange={handleInputChange}
-      options={options}
-      value={props.value}
-    />
-  );
-};
+interface State {
+  readonly value: DateOption | null;
+}
 
-export default () => {
-  const [value, setValue] = useState<DateOption | null>(
-    defaultOptions[0] as DateOption
-  );
-
-  return (
-    <DatePicker value={value} onChange={(newValue) => setValue(newValue)} />
-  );
-};
+export default class Experimental extends Component<{}, State> {
+  state: State = {
+    value: defaultOptions[0] as DateOption,
+  };
+  handleChange = (value: DateOption | null) => {
+    this.setState({ value });
+  };
+  render() {
+    const { value } = this.state;
+    const displayValue =
+      value && 'value' in value ? value.value.toString() : 'null';
+    return (
+      <div>
+        <pre>Value: {displayValue}</pre>
+        <DatePicker value={value} onChange={this.handleChange} />
+      </div>
+    );
+  }
+}

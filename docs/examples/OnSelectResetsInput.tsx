@@ -1,32 +1,48 @@
-import React from 'react';
+import React, { Component } from 'react';
 import Select, { InputActionMeta } from 'react-select';
 import { colourOptions } from '../data';
 
-export default () => {
-  const [menuIsOpen, setMenuIsOpen] = React.useState<boolean>();
+interface State {
+  readonly menuIsOpen?: boolean;
+}
 
-  const onInputChange = (
+export default class OnSelectResetsInput extends Component<{}, State> {
+  state: State = {};
+  onInputChange = (
     inputValue: string,
     { action, prevInputValue }: InputActionMeta
   ) => {
-    if (action === 'input-change') return inputValue;
-    if (action === 'menu-close') {
-      if (prevInputValue) setMenuIsOpen(true);
-      else setMenuIsOpen(undefined);
+    console.log(inputValue, action);
+    switch (action) {
+      case 'input-change':
+        return inputValue;
+      case 'menu-close':
+        console.log(prevInputValue);
+        let menuIsOpen = undefined;
+        if (prevInputValue) {
+          menuIsOpen = true;
+        }
+        this.setState({
+          menuIsOpen,
+        });
+        return prevInputValue;
+      default:
+        return prevInputValue;
     }
-    return prevInputValue;
   };
-
-  return (
-    <Select
-      isMulti
-      defaultValue={colourOptions[0]}
-      isClearable
-      isSearchable
-      onInputChange={onInputChange}
-      name="color"
-      options={colourOptions}
-      menuIsOpen={menuIsOpen}
-    />
-  );
-};
+  render() {
+    const { menuIsOpen } = this.state;
+    return (
+      <Select
+        isMulti
+        defaultValue={colourOptions[0]}
+        isClearable
+        isSearchable
+        onInputChange={this.onInputChange}
+        name="color"
+        options={colourOptions}
+        menuIsOpen={menuIsOpen}
+      />
+    );
+  }
+}

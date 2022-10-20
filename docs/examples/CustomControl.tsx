@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { Component } from 'react';
 
 import Select, { components, ControlProps } from 'react-select';
 import { ColourOption, colourOptions } from '../data';
@@ -16,13 +16,17 @@ const ControlComponent = (props: ControlProps<ColourOption, false>) => (
   </div>
 );
 
-export default () => (
-  <Select
-    defaultValue={colourOptions[0]}
-    isClearable
-    components={{ Control: ControlComponent }}
-    isSearchable
-    name="color"
-    options={colourOptions}
-  />
-);
+export default class CustomControl extends Component {
+  render() {
+    return (
+      <Select
+        defaultValue={colourOptions[0]}
+        isClearable
+        components={{ Control: ControlComponent }}
+        isSearchable
+        name="color"
+        options={colourOptions}
+      />
+    );
+  }
+}

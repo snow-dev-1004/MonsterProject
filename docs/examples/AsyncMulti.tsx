@@ -1,7 +1,11 @@
-import React from 'react';
+import React, { Component } from 'react';
 
 import AsyncSelect from 'react-select/async';
 import { ColourOption, colourOptions } from '../data';
+
+interface State {
+  readonly inputValue: string;
+}
 
 const filterColors = (inputValue: string) => {
   return colourOptions.filter((i) =>
@@ -16,11 +20,21 @@ const promiseOptions = (inputValue: string) =>
     }, 1000);
   });
 
-export default () => (
-  <AsyncSelect
-    isMulti
-    cacheOptions
-    defaultOptions
-    loadOptions={promiseOptions}
-  />
-);
+export default class AsyncMulti extends Component<{}, State> {
+  state: State = { inputValue: '' };
+  handleInputChange = (newValue: string) => {
+    const inputValue = newValue.replace(/\W/g, '');
+    this.setState({ inputValue });
+    return inputValue;
+  };
+  render() {
+    return (
+      <AsyncSelect
+        isMulti
+        cacheOptions
+        defaultOptions
+        loadOptions={promiseOptions}
+      />
+    );
+  }
+}
